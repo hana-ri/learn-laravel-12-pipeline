@@ -1,0 +1,58 @@
+services:
+    nginx:
+        image: ghcr.io/hana-ri/belajar-docker-swarm-nginx_server:latest
+        restart: unless-stopped
+        volumes:
+            - laravel-storage-production:/var/www/html/storage:ro
+        depends_on:
+            php-fpm:
+                condition: service_healthy
+
+    php-fpm:
+        build:
+            args:
+                BUILD_ARGUMENT_ENV: "prod"
+        image: ghcr.io/hana-ri/belajar-docker-swarm-fpm_server:latest
+        restart: unless-stopped
+        volumes:
+            - laravel-storage-production:/var/www/html/storage
+        healthcheck:
+            test: [ "CMD-SHELL", "php-fpm-healthcheck || exit 1" ]
+            interval: 15s
+            timeout: 5s
+            retries: 5
+        depends_on:
+            mysql:
+                condition: service_healthy
+
+    mysql:
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        volumes:
+            - laravel-mysql-production:/var/lib/mysql
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+            interval: 15s
+            timeout: 5s
+            retries: 5
+        depends_on:
+            redis:
+                condition: service_healthy
+
+    redis:
+        restart: unless-stopped
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 15s
+            timeout: 5s
+            retries: 3
+
+volumes:
+    laravel-mysql-production:
+        driver: local
+    laravel-storage-production:
+        driver: local

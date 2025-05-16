@@ -1,0 +1,68 @@
+services:
+    nginx:
+        ports:
+            - "8000:80"
+        restart: unless-stopped
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            php-fpm:
+                condition: service_started
+
+    php-fpm:
+        build:
+            args:
+                BUILD_ARGUMENT_ENV: "dev"
+                HOST_UID: ${HOST_UID}
+                HOST_GID: ${HOST_GID}
+        restart: unless-stopped
+        user: "${HOST_UID}:${HOST_GID}"
+        volumes:
+            - .:/var/www/html
+        healthcheck:
+            test: [ "CMD-SHELL", "php-fpm-healthcheck || exit 1" ]
+            interval: 15s
+            timeout: 5s
+            retries: 5
+        depends_on:
+            mysql:
+                condition: service_healthy
+
+    mysql:
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        volumes:
+            - "laravel-mysql-development:/var/lib/mysql"
+        healthcheck:
+            test: [ "CMD-SHELL", "mysqladmin ping -h localhost || exit 1" ]
+            interval: 15s
+            timeout: 5s
+            retries: 5
+
+    workspace:
+        build:
+            context: .
+            dockerfile: .docker/common/workspace/Dockerfile
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        command: [ "sh", "-c", "npm run dev" ]
+        tty: true
+        stdin_open: true
+        ports:
+            - "3000:3000"
+        volumes:
+            - .:/var/www/html
+        networks:
+            - laravel-network
+
+    redis:
+        restart: unless-stopped
+
+volumes:
+    laravel-mysql-development:
+        driver: local

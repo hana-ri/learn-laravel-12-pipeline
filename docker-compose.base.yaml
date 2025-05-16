@@ -1,0 +1,40 @@
+services:
+    nginx:
+        env_file:
+            - .env
+        build:
+            context: .
+            dockerfile: .docker/common/Dockerfile
+            target: nginx_server
+        networks:
+            - laravel-network
+        depends_on:
+            - php-fpm
+
+    php-fpm:
+        env_file:
+            - .env
+        build:
+            context: .
+            dockerfile: .docker/common/Dockerfile
+            target: fpm_server
+        networks:
+            - laravel-network
+        depends_on:
+            - mysql
+
+    mysql:
+        image: mysql:8
+        ports:
+            - "${DB_PORT}:3306"
+        networks:
+            - laravel-network
+
+    redis:
+        image: redis:7.4-alpine3.21
+        networks:
+            - laravel-network
+
+networks:
+    laravel-network:
+        driver: bridge
