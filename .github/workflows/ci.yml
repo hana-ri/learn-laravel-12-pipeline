@@ -36,14 +36,14 @@ jobs:
       - name: Lint Frontend
         run: npm run lint
 
+      - name: Run git status for debug
+        run: git status
+
       - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: fix code style
           commit_options: '--no-verify'
-
-      - name: Run git status for debug
-        run: git status
 
   tests:
     needs: fix-code-standard
