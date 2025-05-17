@@ -68,7 +68,7 @@ jobs:
       - name: Install PHP Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Copy Environment File
+      - name: Decrypt test environment 
         run: php artisan env:decrypt --env=test --key=${{ secrets.TEST_ENV_KEY }}
 
       - name: Copy Environment File
@@ -85,3 +85,56 @@ jobs:
 
       - name: Run Tests
         run: ./vendor/bin/pest
+
+  build-and-push-docker:
+    name: Build and Push Docker Images
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHRC_TOKEN }}
+
+      - name: Build Docker images
+        run: docker compose -f docker-compose.base.yaml -f docker-compose.prod.yaml build nginx php-fpm
+
+      - name: Determine Project Name for Docker Images
+        id: project_name
+        run: echo "name=$(basename ${{ github.workspace }})" >> $GITHUB_OUTPUT
+
+      - name: Tag and Push Nginx image
+        run: |
+          LOCAL_IMAGE_NGINX="${{ steps.project_name.outputs.name }}_nginx"
+          REMOTE_IMAGE_NGINX="ghcr.io/${{ github.repository }}/nginx"
+
+          echo "Tagging $LOCAL_IMAGE_NGINX to $REMOTE_IMAGE_NGINX:latest and $REMOTE_IMAGE_NGINX:${{ github.sha }}"
+          docker tag "$LOCAL_IMAGE_NGINX" "$REMOTE_IMAGE_NGINX:latest"
+          docker tag "$LOCAL_IMAGE_NGINX" "$REMOTE_IMAGE_NGINX:${{ github.sha }}"
+
+          echo "Pushing $REMOTE_IMAGE_NGINX:latest"
+          docker push "$REMOTE_IMAGE_NGINX:latest"
+          echo "Pushing $REMOTE_IMAGE_NGINX:${{ github.sha }}"
+          docker push "$REMOTE_IMAGE_NGINX:${{ github.sha }}"
+
+      - name: Tag and Push PHP-FPM image
+        run: |
+          LOCAL_IMAGE_PHP="${{ steps.project_name.outputs.name }}_php-fpm"
+          REMOTE_IMAGE_PHP="ghcr.io/${{ github.repository }}/php-fpm"
+
+          echo "Tagging $LOCAL_IMAGE_PHP to $REMOTE_IMAGE_PHP:latest and $REMOTE_IMAGE_PHP:${{ github.sha }}"
+          docker tag "$LOCAL_IMAGE_PHP" "$REMOTE_IMAGE_PHP:latest"
+          docker tag "$LOCAL_IMAGE_PHP" "$REMOTE_IMAGE_PHP:${{ github.sha }}"
+
+          echo "Pushing $REMOTE_IMAGE_PHP:latest"
+          docker push "$REMOTE_IMAGE_PHP:latest"
+          echo "Pushing $REMOTE_IMAGE_PHP:${{ github.sha }}"
+          docker push "$REMOTE_IMAGE_PHP:${{ github.sha }}"
