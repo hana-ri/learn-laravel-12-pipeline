@@ -1,6 +1,6 @@
 services:
     nginx:
-        image: ghcr.io/hana-ri/learn-laravel-12-pipeline:latest
+        image: ghcr.io/hana-ri/learn-laravel-12-pipeline/nginx:latest
         restart: unless-stopped
         volumes:
             - laravel-storage-production:/var/www/html/storage:ro
@@ -12,7 +12,7 @@ services:
         build:
             args:
                 BUILD_ARGUMENT_ENV: "prod"
-        image: ghcr.io/hana-ri/learn-laravel-12-pipeline:latest
+        image: ghcr.io/hana-ri/learn-laravel-12-pipeline/php-fpm:latest
         restart: unless-stopped
         volumes:
             - laravel-storage-production:/var/www/html/storage
