@@ -62,7 +62,7 @@ jobs:
           path: reports/coverage.xml
 
   docker-build-and-push:
-    needs: laravel-ci
+    needs: laravel-build-test
     runs-on: ubuntu-latest
 
     env:
