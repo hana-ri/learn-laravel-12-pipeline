@@ -1,6 +1,6 @@
 ARG HOST_UID=1000
 ARG HOST_GID=1000
-ARG BUILD_ARGUMENT_ENV=dev
+ARG BUILD_ARGUMENT_ENV=prod
 ARG WORKDIR=/var/www/html
 
 # Base layer for backend dependencies
@@ -26,7 +26,8 @@ RUN apk add --no-cache --virtual .build-deps ${PHPIZE_DEPS} && \
     && pecl install \
         redis \
     && docker-php-ext-enable \
-        redis
+        redis \
+    && apk del .build-deps
 
 # Copy composer files and install dependencies
 COPY --chown=composer:composer ./composer.json ./composer.lock ./
@@ -75,7 +76,8 @@ RUN apk add --no-cache --virtual .build-deps ${PHPIZE_DEPS} && \
     && pecl install \
         redis \
     && docker-php-ext-enable \
-        redis
+        redis \
+    && apk del .build-deps
 
 # Install composer and PHP-FPM healthcheck
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
