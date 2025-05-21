@@ -1,5 +1,7 @@
 services:
     nginx:
+        ports:
+            - "8000:80"
         image: ghcr.io/hana-ri/learn-laravel-12-pipeline/nginx:latest
         restart: unless-stopped
         volumes:

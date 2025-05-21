@@ -1,4 +1,4 @@
-export COMPOSE_PROJECT_NAME=mw-presensi
+export COMPOSE_PROJECT_NAME=learn-laravel-12-pipeline
 
 HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
