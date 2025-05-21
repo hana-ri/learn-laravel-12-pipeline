@@ -12,7 +12,7 @@ on:
 
 permissions:
   contents: write
-  packages: write  # Diperlukan untuk push ke GHCR
+  packages: write
 
 jobs:
   test:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
           extensions: >
             ctype,
             curl,
@@ -82,13 +82,15 @@ jobs:
 
     env:
       SHORT_SHA: ${{ github.sha }}
+      IMAGE_PHP_FPM_BASE: ghcr.io/hana-ri/learn-laravel-12-pipeline/php-fpm
+      IMAGE_NGINX_BASE: ghcr.io/hana-ri/learn-laravel-12-pipeline/nginx
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Set short SHA
         id: vars
-        run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+        run: echo "SHORT_SHA_ENV=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -102,19 +104,25 @@ jobs:
           docker build \
             --target fpm_server \
             --build-arg BUILD_ARGUMENT_ENV=prod \
-            -t ghcr.io/hana-ri/learn-laravel-12-pipeline/php-fpm:${{ env.SHORT_SHA }} \
+            -t ${{ env.IMAGE_PHP_FPM_BASE }}:${{ env.SHORT_SHA_ENV }} \
+            -t ${{ env.IMAGE_PHP_FPM_BASE }}:latest \
             -f .docker/common/Dockerfile .
 
       - name: Push PHP-FPM Docker Image
-        run: docker push ghcr.io/hana-ri/learn-laravel-12-pipeline/php-fpm:${{ env.SHORT_SHA }}
+        run: |
+          docker push ${{ env.IMAGE_PHP_FPM_BASE }}:${{ env.SHORT_SHA_ENV }}
+          docker push ${{ env.IMAGE_PHP_FPM_BASE }}:latest
 
       - name: Build Nginx Docker Image
         run: |
           docker build \
             --target nginx_server \
             --build-arg BUILD_ARGUMENT_ENV=prod \
-            -t ghcr.io/hana-ri/learn-laravel-12-pipeline/nginx:${{ env.SHORT_SHA }} \
+            -t ${{ env.IMAGE_NGINX_BASE }}:${{ env.SHORT_SHA_ENV }} \
+            -t ${{ env.IMAGE_NGINX_BASE }}:latest \
             -f .docker/common/Dockerfile .
 
       - name: Push Nginx Docker Image
-        run: docker push ghcr.io/hana-ri/learn-laravel-12-pipeline/nginx:${{ env.SHORT_SHA }}
+        run: |
+          docker push ${{ env.IMAGE_NGINX_BASE }}:${{ env.SHORT_SHA_ENV }}
+          docker push ${{ env.IMAGE_NGINX_BASE }}:latest
