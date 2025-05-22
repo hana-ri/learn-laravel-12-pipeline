@@ -48,7 +48,7 @@ jobs:
 
       - name: Setup CI Environment
         run: |
-          php artisan env:decrypt --env=test --key=${{ secrets.TEST_ENV_KEY }}
+          php artisan env:decrypt --env=ci --key=${{ secrets.TEST_ENV_KEY }}
           cp .env.ci .env
           rm .env.ci
 
