@@ -7,11 +7,6 @@
 /storage/*.key
 /storage/pail
 /vendor
-.env
-.env.backup
-.env.production
-.env.test
-.env.ci
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -24,3 +19,10 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+# Ignore semua file yang diawali .env
+.env*
+# kecualikan file:
+!*encrypted
+!.env.example
+# Untuk kubernetes
+.k8s/secrets.yml
