@@ -1,0 +1,166 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-12-nginx
+  labels:
+    app: laravel-12-app
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: laravel-12-app
+      tier: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: laravel-12-app
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: ghcr.io/hana-ri/learn-laravel-12-pipeline/nginx:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        volumeMounts:
+        - name: storage
+          mountPath: /var/www/html/storage
+          readOnly: true
+      imagePullSecrets:
+        - name: laravel-12-ghcr-secret
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: laravel-12-storage-pvc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-12-php-fpm
+  labels:
+    app: laravel-12-app
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: laravel-12-app
+      tier: backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: laravel-12-app
+        tier: backend
+    spec:
+      containers:
+      - name: php-fpm
+        image: ghcr.io/hana-ri/learn-laravel-12-pipeline/php-fpm:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+          name: fpm
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
+        livenessProbe:
+          exec:
+            command:
+              - php-fpm-healthcheck
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - php-fpm-healthcheck
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+        env:
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: APP_KEY
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: DB_PASSWORD
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: REDIS_PASSWORD
+                optional: true
+        envFrom:
+          - configMapRef:
+              name: laravel-12-app-config
+        volumeMounts:
+        - name: storage
+          mountPath: /var/www/html/storage
+      imagePullSecrets:
+        - name: laravel-12-ghcr-secret
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: laravel-12-storage-pvc
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: laravel-12-storage-pvc
+  labels:
+    app: laravel-12-app
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard

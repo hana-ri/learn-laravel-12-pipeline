@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: laravel-12-migrations
+  labels:
+    app: laravel-12-app
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      containers:
+      - name: migrations
+        image: ghcr.io/hana-ri/learn-laravel-12-pipeline/php-fpm:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            php artisan migrate --force
+        env:
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: APP_KEY
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: DB_PASSWORD
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: REDIS_PASSWORD
+                optional: true
+        envFrom:
+          - configMapRef:
+              name: laravel-12-app-config
+        volumeMounts:
+        - name: storage
+          mountPath: /var/www/html/storage
+      imagePullSecrets:
+        - name: laravel-12-ghcr-secret
+      restartPolicy: Never
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: laravel-12-storage-pvc
+  backoffLimit: 3

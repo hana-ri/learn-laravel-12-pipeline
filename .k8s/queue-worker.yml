@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-12-queue-worker
+  labels:
+    app: laravel-12-app
+    tier: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laravel-12-app
+      tier: worker
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: laravel-12-app
+        tier: worker
+    spec:
+      containers:
+      - name: queue-worker
+        image: ghcr.io/hana-ri/learn-laravel-12-pipeline/php-fpm:latest
+        imagePullPolicy: Always
+        command: ["php", "artisan", "queue:work", "--tries=3", "--backoff=3"]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        env:
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: APP_KEY
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: DB_PASSWORD
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: laravel-12-app-secrets
+                key: REDIS_PASSWORD
+                optional: true
+        envFrom:
+          - configMapRef:
+              name: laravel-12-app-config
+        volumeMounts:
+        - name: storage
+          mountPath: /var/www/html/storage
+      imagePullSecrets:
+        - name: laravel-12-ghcr-secret
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: laravel-12-storage-pvc

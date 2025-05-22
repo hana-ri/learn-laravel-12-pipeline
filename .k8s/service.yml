@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: laravel-12-nginx
+  labels:
+    app: laravel-12-app
+    tier: frontend
+spec:
+  selector:
+    app: laravel-12-app
+    tier: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: laravel-12-php-fpm
+  labels:
+    app: laravel-12-app
+    tier: backend
+spec:
+  selector:
+    app: laravel-12-app
+    tier: backend
+  ports:
+    - port: 9000
+      targetPort: 9000
+      name: fpm
+  type: ClusterIP
+
+---
+
+# MySQL and Redis services removed as they will be using managed services
