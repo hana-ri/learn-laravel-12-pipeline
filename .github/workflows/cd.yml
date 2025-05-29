@@ -33,7 +33,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          script: whoami
+          script: |
+            cd ~/learn-laravel-12-pipeline/
+            git status
 
 
   # rollback:
