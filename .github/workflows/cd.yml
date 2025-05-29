@@ -1,0 +1,75 @@
+name: Laravel CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Laravel CI Pipeline"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: deploy using bastion host
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: whoami
+
+
+  # rollback:
+  #   runs-on: ubuntu-latest
+  #   if: failure() && needs.deploy.result == 'failure'
+  #   needs: deploy
+    
+  #   steps:
+  #     - name: Setup SSH for rollback
+  #       uses: webfactory/ssh-agent@v0.9.0
+  #       with:
+  #         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+  #     - name: Add bastion host to known hosts
+  #       run: |
+  #         mkdir -p ~/.ssh
+  #         ssh-keyscan -H ${{ secrets.BASTION_HOST }} >> ~/.ssh/known_hosts
+
+  #     - name: Rollback deployment
+  #       run: |
+  #         ssh -o StrictHostKeyChecking=no ${{ secrets.BASTION_USER }}@${{ secrets.BASTION_HOST }} << 'EOF'
+  #           set -e
+            
+  #           echo "🔄 Starting rollback process..."
+            
+  #           cd learn-laravel-12-pipeline/.k8s
+            
+  #           # Rollback to previous version
+  #           kubectl rollout undo deployment/laravel-12-nginx
+  #           kubectl rollout undo deployment/laravel-12-php-fpm  
+  #           kubectl rollout undo deployment/laravel-12-queue-worker
+            
+  #           # Wait for rollback to complete
+  #           kubectl rollout status deployment/laravel-12-nginx --timeout=300s
+  #           kubectl rollout status deployment/laravel-12-php-fpm --timeout=300s
+  #           kubectl rollout status deployment/laravel-12-queue-worker --timeout=300s
+            
+  #           echo "✅ Rollback completed successfully!"
+  #         EOF
