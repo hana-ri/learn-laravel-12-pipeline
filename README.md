@@ -10,7 +10,7 @@ Aplikasi yang dideploy adalah Vue Starter Kit berbasis Laravel, yang mencakup fi
    Deployment aplikasi dilakukan ke layanan yang tersedia di Google Cloud Platform.
 
 2. **Infrastructure as Code (IaC)**  
-   Infrastruktur GCP dikonfigurasi menggunakan Terraform. Dokumentasi lengkap tersedia di [.github/workflows/README.md](.github/workflows/README.md).
+   Infrastruktur GCP dikonfigurasi menggunakan Terraform. Dokumentasi lengkap tersedia di [https://github.com/hana-ri/Learn-IaC-on-GCP](https://github.com/hana-ri/Learn-IaC-on-GCP).
 
 3. **GitHub Container Registry**  
    Image hasil build disimpan di GitHub Container Registry, dan digunakan dalam proses deployment ke Kubernetes.
