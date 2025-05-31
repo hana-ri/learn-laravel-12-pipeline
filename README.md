@@ -54,9 +54,9 @@ Untuk informasi lebih detail tentang pipeline, lihat di [.github/workflows/READM
 ## Deploy ke GKE
 
 ### 1. Masuk ke VM (Compute Engine di GCP) melalui SSH:
-    ```bash
-    ssh gcp-bastion
-    ```
+```bash
+ssh gcp-bastion
+```
 
 ###  2. Install `kubectl` dengan mengikuti dokumentasi resmi:
 [https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
