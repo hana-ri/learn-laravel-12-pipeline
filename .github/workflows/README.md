@@ -2,7 +2,7 @@
 
 Repositori ini menggunakan GitHub Actions untuk mengotomatisasi proses CI/CD (Continuous Integration/Continuous Deployment) untuk aplikasi Laravel 12. Dokumentasi ini menjelaskan workflow yang tersedia dan cara penggunaannya.
 
-## Alur Pipeline
+## Alur
 
 ```
 Code Push → CI Pipeline → Build Images → CD Pipeline → Deploy to K8s
