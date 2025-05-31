@@ -13,7 +13,7 @@ spec:
     - port: 80
       targetPort: 80
       name: http
-  type: ClusterIP
+  type: LoadBalancer
 
 ---
 
@@ -33,7 +33,4 @@ spec:
       targetPort: 9000
       name: fpm
   type: ClusterIP
-
----
-
-# MySQL and Redis services removed as they will be using managed services
+  

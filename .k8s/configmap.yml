@@ -16,15 +16,16 @@ data:
   LOG_LEVEL: "error"
   
   DB_CONNECTION: "mysql"
-  DB_HOST: "host.docker.internal"
-  DB_PORT: "5001"
+  DB_HOST: "10.84.0.3"
+  DB_PORT: "3306"
   DB_DATABASE: "dev_test"
   
   CACHE_STORE: "redis"
   
   REDIS_CLIENT: "phpredis"
-  REDIS_HOST: "host.docker.internal"
-  REDIS_PORT: "5501"
+  REDIS_HOST: "redis-15181.c295.ap-southeast-1-1.ec2.redns.redis-cloud.com"
+  REDIS_USERNAME: "default"
+  REDIS_PORT: "15181"
   
   SESSION_DRIVER: "redis"
   SESSION_LIFETIME: "120"

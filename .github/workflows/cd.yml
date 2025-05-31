@@ -7,16 +7,6 @@ on:
       - completed
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - staging
 
 jobs:
   deploy:
@@ -35,7 +25,10 @@ jobs:
           port: 22
           script: |
             cd ~/learn-laravel-12-pipeline/
+            git pull origin main
             git status
+            cd .k8s
+            kubectl -f apply .
 
 
   # rollback:
