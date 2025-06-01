@@ -29,8 +29,6 @@ jobs:
             git status
             cd .k8s
             kubectl apply -f .
-            kubectl rollout restart deployment laravel-12-nginx
-            kubectl rollout restart deployment laravel-12-php-fpm
 
   # rollback:
   #   runs-on: ubuntu-latest
