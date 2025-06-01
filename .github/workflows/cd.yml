@@ -28,7 +28,7 @@ jobs:
             git pull origin main
             git status
             cd .k8s
-            kubectl -f apply .
+            kubectl apply -f
 
 
   # rollback:

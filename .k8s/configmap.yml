@@ -16,7 +16,7 @@ data:
   LOG_LEVEL: "error"
   
   DB_CONNECTION: "mysql"
-  DB_HOST: "10.84.0.3"
+  DB_HOST: "10.173.0.3"
   DB_PORT: "3306"
   DB_DATABASE: "dev_test"
   
