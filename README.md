@@ -10,14 +10,40 @@ Aplikasi yang dideploy adalah Vue Starter Kit berbasis Laravel, yang mencakup fi
    Deployment aplikasi dilakukan ke layanan yang tersedia di Google Cloud Platform.
 
 2. **Infrastructure as Code (IaC)**  
-   Infrastruktur GCP dikonfigurasi menggunakan Terraform. Dokumentasi lengkap tersedia di [https://github.com/hana-ri/Learn-IaC-on-GCP](https://github.com/hana-ri/Learn-IaC-on-GCP).
-
+   Infrastruktur GCP dikonfigurasi menggunakan Terraform.
 3. **GitHub Container Registry**  
    Image hasil build disimpan di GitHub Container Registry, dan digunakan dalam proses deployment ke Kubernetes.
 
 4. **GitHub Actions**  
    Seluruh proses CI/CD diotomatisasi menggunakan GitHub Actions, mulai dari pengujian, build image, push image, hingga deployment.
 
+## Topologi GCP
+Project ini akan di deploy pada GCP denga topologi berikut ini.
+Dokumentasi lengkap tersedia di [https://github.com/hana-ri/Learn-IaC-on-GCP](https://github.com/hana-ri/Learn-IaC-on-GCP).
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                             Google Cloud Platform                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │                    VPC Network (dev-home-lab-vpc)                   │ │
+│  │                                                                     │ │
+│  │  ┌─────────────────┐  ┌──────────────────┐  ┌─────────────────┐     │ │
+│  │  │   Public Subnet │  │ Private Container│  │Private Database │     │ │
+│  │  │   10.0.1.0/24   │  │   Subnet         │  │   Subnet        │     │ │
+│  │  │                 │  │   10.0.2.0/24    │  │   10.0.3.0/24   │     │ │
+│  │  │                 │  │                  │  │                 │     │ │
+│  │  │ ┌─────────────┐ │  │ ┌──────────────┐ │  │ ┌─────────────┐ │     │ │
+│  │  │ │   Bastion   │ │  │ │     GKE      │ │  │ │   Cloud     │ │     │ │
+│  │  │ │    Host     │ │  │ │   Cluster    │ │  │ │    SQL      │ │     │ │
+│  │  │ │             │ │  │ │              │ │  │ │  (MySQL)    │ │     │ │
+│  │  │ │ Public IP   │ │  │ │ Private IP   │ │  │ │ Private IP  │ │     │ │
+│  │  │ │ SSH Access  │ │  │ │ e2-medium    │ │  │ │ db-f1-micro │ │     │ │
+│  │  │ └─────────────┘ │  │ └──────────────┘ │  │ └─────────────┘ │     │ │
+│  │  └─────────────────┘  └──────────────────┘  └─────────────────┘     │ │
+│  │                                                                     │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────┘
+```
 
 ## Pipeline CI/CD
 
